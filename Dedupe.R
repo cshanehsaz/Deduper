@@ -131,7 +131,7 @@ DeleteFirstRow <- function(df.clean) {
   return(df.clean)
 }
 
-RunDedupe <- function(file='all_contacts_for_dedupe.csv'){
+RunDedupe <- function(file='all_contacts_for_dedupe.csv', oldMaster=''){
   df <- head(read.csv(file))
   if(!('X18.Digit.Contact.ID'%in%names(df) && 'Email'%in%names(df) && 'Created.Date'%in%names(df))) {
     stop('You must include the 18 digit contact ID, Created Date, and Email Fields.')
@@ -144,6 +144,9 @@ RunDedupe <- function(file='all_contacts_for_dedupe.csv'){
                            "Original.Guru.Date.Created", "First.Conversion", "Original.Source",
                            "First.Conversion.Date", "Old...Cadence.Name", "Old...Last.Complete.Step",
                            "Old...Next.Step.Due.Date")
+  if(oldMaster !='') {
+    fieldsWithOldMaster <<- oldMaster
+  }
   IdsToDelete <<- c()
   mergeAllDuplicates(df)
   df.clean <<- setNames(df.clean, names(df))
@@ -158,6 +161,8 @@ RunDedupe <- function(file='all_contacts_for_dedupe.csv'){
 }
 
 #Requirements:
+#can now include oldMaster list to allow the UI to actually do something
+
 # RunDedupe('records_to_dedupe.csv')
-RunDedupe('DuplicatesForRTest5.csv')
+#RunDedupe('DuplicatesForRTest5.csv')
 # RunDedupe('dedupetest6.csv')

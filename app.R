@@ -4,9 +4,9 @@ library(ggplot2)
 library(scales)
 # library(dplyr)
 # library(formattable)
-#source('Dedupe.R')
+source('Dedupe.R')
 mylist <- c('a','b','c')
-options(shiny.maxRequestSize = 10*1024^2) #Change MB to suit your needs
+options(shiny.maxRequestSize = 10*1024^2) #10MB
 
 
 
@@ -16,7 +16,7 @@ header <- dashboardHeader(title = "Guru Deduper")
 sidebar <- dashboardSidebar(
   sidebarMenu(
     #menuItem("Landing", tabName="Landing", icon = icon("home")),
-    menuItem("GUI", tabName = mylist[1], icon = icon("align-justify")),
+    menuItem("GUI", tabName = "GUI", icon = icon("align-justify")),
     menuItem("Source", href="github.com/cshanehsaz/shinydashboard", icon=icon("github"))
   )
 )
@@ -55,16 +55,20 @@ dedupeUI <- fluidRow(
     h4("First, select the CSV file you want to dedupe."),
     h4("Then check the boxes below if you want to use the MOST RECENT 
        contact values rather than the oldest."),
+    h4("After selecting, hit the submit button to run the dedupe"),
     uiOutput("inputs"),
+    actionButton(inputId="button", label="Submit"),
+    verbatimTextOutput("buttonCheck"),
     title = "Game Parameters",
     status = "primary",
     solidHeader = TRUE,
-    collapsible = TRUE
+    collapsible = TRUE,
+    width=12
   )
 )
 
 tabs <- tabItems(
-  tabItem(tabName = mylist[1],
+  tabItem(tabName = "GUI",
           dedupeUI
   ),
   tabItem(tabName = "Landing",
@@ -79,7 +83,6 @@ ui <- dashboardPage(title = 'Dedupe', header, sidebar, body, skin = 'blue')
 
 
 
-
 # create the server functions for the dashboard  
 server <- function(input, output) { 
   output$inputs <- renderUI({
@@ -87,15 +90,36 @@ server <- function(input, output) {
       return()
     }
     df <- read.csv(input$file$datapath)
-    inputs <- as.integer(length(df))
-    lapply(1:inputs, function(i) {
-      checkboxInput(inputId = paste0("input", i), label = paste(names(df)[i]), value = TRUE)
+    column_names <<- names(df)
+    totalColumns <<- as.integer(length(df))
+    lapply(1:totalColumns, function(i) {
+      checkboxInput(inputId = paste0("input", i), label = paste(names(df)[i]), value = FALSE)
     })
   })
-  output$fileUpload <- renderValueBox(
-    expr=div(input$file[1]$name)
-  )
+
+  #when the submit button is hit, returns a list of all column names
+  #that are set to true
+  observeEvent((input$button), {
+    if(!is.null(input$file)) {
+      print("it's alive!")
+      recents <<- c()
+      lapply(1:totalColumns, function(i) {
+        recents <<- c(recents, input[[paste0("input", i)]])
+      })
+      recents <<- which(recents == TRUE)
+      print(length(recents))
+      if(length(recents)>0) {
+        recents <- column_names[recents]
+      }
+      print(recents) 
+      RunDedupe(file = input$file$datapath, oldMaster = recents)
+    }
+  })
   
+  output$fileUpload <- renderValueBox(
+    expr=div(input$file$name)
+  )
+ 
 }
 
 shinyApp(ui, server)
