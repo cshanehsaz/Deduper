@@ -66,7 +66,8 @@ dedupeUI <- fluidRow(
     h5("Note: If you upload a very large file (>10MB) it may take a few moments 
        for the fields to appear below."),
     h4("3. After selecting your desired fields, hit the submit button to run the dedupe"),
-    h4("4. After the dedupe is complete, you will find two files in the folder: ", getwd(),
+    h4("4. Monitor the status of the job by looking at the terminal window that was opened with the browser window"),
+    h4("5. After the dedupe is complete, you will find two files in the folder: ", getwd(),
        ". They are named 'RecordsToUpdate.csv' and 'RecordsToDelete.csv'. Run these files through
        workbench to finalize the dedupe in your database."),
     uiOutput("inputs"),
