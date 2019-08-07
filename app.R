@@ -72,7 +72,7 @@ dedupeUI <- fluidRow(
     uiOutput("inputs"),
     actionButton(inputId="button", label="Submit"),
     #div(verbatimTextOutput("status")),
-    title = "Game Parameters",
+    title = "Merge Parameters",
     status = "primary",
     solidHeader = TRUE,
     collapsible = TRUE,
