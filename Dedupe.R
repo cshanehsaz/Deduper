@@ -1,6 +1,7 @@
 #merges records based on duplicate emails
 #ToDo: add a time estimator
 loadAndSortDataframe <- function(file = 'DuplicatesForRTest.csv') {
+  cat('Processing: 0%\n')
   df <- data.frame(read.csv(file), stringsAsFactors = FALSE)
   df <- df[order(df$Email),]
   numCols <- length(df)
@@ -11,7 +12,8 @@ loadAndSortDataframe <- function(file = 'DuplicatesForRTest.csv') {
     keyEmail <- df$Email[keyRow]
     if((keyRow/100) == as.integer(keyRow/100)) {
       cat('\014')
-      cat("Processing: ", as.integer(keyRow/nrow(df)*100), "%\n", sep='')
+      cat("Processing: ", as.integer(keyRow/nrow(df)*100), "%\r", sep='')
+      #progress <<- as.integer(keyRow/nrow(df)*100)
     }
     
     lowerIndex <- keyRow - 20
@@ -26,8 +28,7 @@ loadAndSortDataframe <- function(file = 'DuplicatesForRTest.csv') {
     }
     
   }
-  cat('\014')
-  cat("Processing Complete: Finishing Execution\n")
+  cat("Processing Complete: Finishing Execution...\n")
   df.dupes <- rbind(df.dupes, df[rowsToSave,])
   return(df.dupes)
 }
@@ -126,7 +127,6 @@ DeleteFirstRow <- function(df.clean) {
   }
   if(deletefirstrow == TRUE) {
     df.clean <- df.clean[-1,]
-    print("First Row Deleted")
   }
   return(df.clean)
 }
@@ -136,6 +136,8 @@ RunDedupe <- function(file='all_contacts_for_dedupe.csv', oldMaster=''){
   if(!('X18.Digit.Contact.ID'%in%names(df) && 'Email'%in%names(df) && 'Created.Date'%in%names(df))) {
     stop('You must include the 18 digit contact ID, Created Date, and Email Fields.')
   }
+  cat('File is Valid\n')
+  cat('Pre-Processing Records...\n')
   df <- loadAndSortDataframe(file)
   df <- replaceBlankWithNA(df)
   df.clean <<- data.frame()
@@ -144,7 +146,7 @@ RunDedupe <- function(file='all_contacts_for_dedupe.csv', oldMaster=''){
                            "Original.Guru.Date.Created", "First.Conversion", "Original.Source",
                            "First.Conversion.Date", "Old...Cadence.Name", "Old...Last.Complete.Step",
                            "Old...Next.Step.Due.Date")
-  if(oldMaster !='') {
+  if(oldMaster[1] != '') {
     fieldsWithOldMaster <<- oldMaster
   }
   IdsToDelete <<- c()
@@ -153,16 +155,16 @@ RunDedupe <- function(file='all_contacts_for_dedupe.csv', oldMaster=''){
   df.clean <- DeleteFirstRow(df.clean)
   IdsToDelete <<- data.frame(IdsToDelete)
   
-  try(file.remove('/Users/cshanehsaz/Downloads/RecordsToUpdate.csv'))
-  try(file.remove('/Users/cshanehsaz/Downloads/RecordsToDelete.csv'))
-  write.csv(df.clean, '/Users/cshanehsaz/Downloads/RecordsToUpdate.csv')
-  write.csv(IdsToDelete, '/Users/cshanehsaz/Downloads/RecordsToDelete.csv')
-  View(df.clean)
+  updateDir <- paste0(getwd(), '/RecordsToUpdate.csv')
+  deleteDir <- paste0(getwd(), '/RecordsToDelete.csv')
+  
+  try(file.remove(updateDir))
+  try(file.remove(deleteDir))
+  write.csv(df.clean, updateDir)
+  write.csv(IdsToDelete, deleteDir)
+  cat('Execution Complete\n')
 }
 
-#Requirements:
-#can now include oldMaster list to allow the UI to actually do something
-
 # RunDedupe('records_to_dedupe.csv')
-#RunDedupe('DuplicatesForRTest5.csv')
+# RunDedupe('DuplicatesForRTest5.csv')
 # RunDedupe('dedupetest6.csv')

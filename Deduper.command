@@ -1,0 +1,1 @@
+R -e "shiny::runApp('~/Documents/RDeduper',launch.browser=TRUE)"

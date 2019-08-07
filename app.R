@@ -1,13 +1,21 @@
-library(shiny)
-require(shinydashboard)
-library(ggplot2)
-library(scales)
-# library(dplyr)
-# library(formattable)
+if(require(shiny) == FALSE) {
+  install.packages('shiny')
+}
+if(require(shinydashboard) == FALSE) {
+  install.packages('shinydashboard')
+}
+if(require(ggplot2) == FALSE) {
+  install.packages('ggplot2')
+}
+if(require(scales) == FALSE) {
+  install.packages('scales')
+}
 source('Dedupe.R')
-mylist <- c('a','b','c')
-options(shiny.maxRequestSize = 10*1024^2) #10MB
 
+options(shiny.maxRequestSize = 200*1024^2) #10MB
+
+#ToDo:
+# -add a progress bar to the webapp
 
 
 #Dashboard header carrying the title of the dashboard
@@ -52,13 +60,18 @@ dedupeUI <- fluidRow(
     width=12
   ),
   box(
-    h4("First, select the CSV file you want to dedupe."),
-    h4("Then check the boxes below if you want to use the MOST RECENT 
-       contact values rather than the oldest."),
-    h4("After selecting, hit the submit button to run the dedupe"),
+    h4("1. Select the CSV file you want to dedupe."),
+    h4("2. Check the boxes below for the fields where you want to use the MOST RECENT 
+       contact values. The values on the oldest contact are used by default."), 
+    h5("Note: If you upload a very large file (>10MB) it may take a few moments 
+       for the fields to appear below."),
+    h4("3. After selecting your desired fields, hit the submit button to run the dedupe"),
+    h4("4. After the dedupe is complete, you will find two files in the folder: ", getwd(),
+       ". They are named 'RecordsToUpdate.csv' and 'RecordsToDelete.csv'. Run these files through
+       workbench to finalize the dedupe in your database."),
     uiOutput("inputs"),
     actionButton(inputId="button", label="Submit"),
-    verbatimTextOutput("buttonCheck"),
+    #div(verbatimTextOutput("status")),
     title = "Game Parameters",
     status = "primary",
     solidHeader = TRUE,
@@ -97,21 +110,25 @@ server <- function(input, output) {
     })
   })
 
+  output$status <- renderText({
+    width = 100
+    paste0('0% Complete')
+  })
+  
   #when the submit button is hit, returns a list of all column names
   #that are set to true
   observeEvent((input$button), {
     if(!is.null(input$file)) {
-      print("it's alive!")
       recents <<- c()
       lapply(1:totalColumns, function(i) {
         recents <<- c(recents, input[[paste0("input", i)]])
       })
       recents <<- which(recents == TRUE)
-      print(length(recents))
       if(length(recents)>0) {
         recents <- column_names[recents]
+      } else {
+        recents = ''
       }
-      print(recents) 
       RunDedupe(file = input$file$datapath, oldMaster = recents)
     }
   })
@@ -119,7 +136,6 @@ server <- function(input, output) {
   output$fileUpload <- renderValueBox(
     expr=div(input$file$name)
   )
- 
 }
 
 shinyApp(ui, server)
