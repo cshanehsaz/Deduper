@@ -23,9 +23,9 @@ header <- dashboardHeader(title = "Guru Deduper")
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    #menuItem("Landing", tabName="Landing", icon = icon("home")),
+    menuItem("Landing", tabName="Landing", icon = icon("home")),
     menuItem("GUI", tabName = "GUI", icon = icon("align-justify")),
-    menuItem("Source", href="github.com/cshanehsaz/shinydashboard", icon=icon("github"))
+    menuItem("Source", href="https://github.com/cshanehsaz/shinydashboard", icon=icon("github"))
   )
 )
 
