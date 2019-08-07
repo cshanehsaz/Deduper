@@ -1,1 +1,1 @@
-R -e "shiny::runApp('~/Documents/RDeduper',launch.browser=TRUE)"
+R -e "shiny::runApp('~/Downloads/Deduper-master',launch.browser=TRUE)"
