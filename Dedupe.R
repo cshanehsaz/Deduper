@@ -134,7 +134,9 @@ DeleteFirstRow <- function(df.clean) {
 RunDedupe <- function(file='all_contacts_for_dedupe.csv', oldMaster=''){
   df <- head(read.csv(file))
   if(!('X18.Digit.Contact.ID'%in%names(df) && 'Email'%in%names(df) && 'Created.Date'%in%names(df))) {
-    stop('You must include the 18 digit contact ID, Created Date, and Email Fields.')
+    warning('You must include the 18 digit contact ID, Created Date, and Email Fields.')
+    cat('Execution Interrupted. Please submit new CSV with required fields.')
+    return()
   }
   cat('File is Valid\n')
   cat('Pre-Processing Records...\n')
