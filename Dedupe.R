@@ -78,7 +78,7 @@ mergeFields <- function(dataframe) {
         if(!is.na(dataframe[row, column])) {
           #old is master
           if(names(dataframe)[column] %in% fieldsWithOldMaster) {
-            if(dataframe$Created.Date[row] < tempDate) {
+            if(dataframe$Created.Date[row] > tempDate) {
               temp <- dataframe[row, column]
               tempData <- dataframe$Created.Date[row]
               count <- count + 1
@@ -86,7 +86,7 @@ mergeFields <- function(dataframe) {
           }
           #recent is master
           else {
-            if(dataframe$Created.Date[row] > tempDate) {
+            if(dataframe$Created.Date[row] < tempDate) {
               temp <- dataframe[row, column]
               tempData <- dataframe$Created.Date[row]
               count <- count + 1
